@@ -1,0 +1,2 @@
+# ScaleCoordinates
+UiPath ScaleCoordinates tool
