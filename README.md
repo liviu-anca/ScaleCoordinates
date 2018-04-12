@@ -18,7 +18,7 @@ The initial value will be multiplied by `<multiply>` and divided by `<divide>`.
 #### Example:
 
 ```CMD
-ScaleCoordinates "C:\UiPath\Projects\Activities\Main.xaml" "C:\UiPath\Projects\Activities_fixed\Main.xaml 100 150
+ScaleCoordinates "C:\UiPath\Projects\Activities\Main.xaml" "C:\UiPath\Projects\Activities_fixed\Main.xaml" 100 150
 ```
 This command will scale the coordinates by a factor of 0.667 (100/150). It would be useful if the workflow file was saved at a scale of 150% in a previous version (18.1.x) and run at a scale of 100% in the current version (18.2.x).
 
