@@ -9,9 +9,9 @@ Open a Command Prompt window and type:
 ```CMD
 ScaleCoordinates <xaml_file_path_in> <xaml_file_path_out> <multiply> <divide>
 ```
-`<xaml_file_path_in>`: path to XAML source file
+`<input_xaml_file_path>`: path to XAML source file
 
-`<xaml_file_path_out>`: path to XAML destination file
+`<output_xaml_file_path>`: path to XAML destination file
 
 The initial value will be multiplied by `<multiply>` and divided by `<divide>`.
 

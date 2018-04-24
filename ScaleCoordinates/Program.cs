@@ -13,7 +13,7 @@ namespace ScaleCoordinates
 
             if (args.Length != 4)
             {
-                Console.WriteLine("Usage: ScaleCoordinates <xaml_file_path_in> <xaml_file_path_out> <multiply> <divide>");
+                Console.WriteLine("Usage: ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> <multiply> <divide>");
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace ScaleCoordinates
                                 int.TryParse(values[2], out var width) &&
                                 int.TryParse(values[3], out var height))
                                 rectangle.Value = string.Join(", ",
-                                    new[] { (int)(factor * x), (int)(factor * y), (int)(factor * width), (int)(factor * height) }
+                                    new[] { (int)Math.Round(factor * x), (int)Math.Round(factor * y), (int)Math.Round(factor * width), (int)Math.Round(factor * height) }
                                     .Select(v => v.ToString(CultureInfo.InvariantCulture)));
                         }
                     }
