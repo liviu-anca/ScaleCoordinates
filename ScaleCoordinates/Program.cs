@@ -60,9 +60,9 @@ namespace ScaleCoordinates
                     var offsetY = attributes["OffsetY"];
 
                     if (offsetX != null && !string.IsNullOrEmpty(offsetX.Value) && int.TryParse(offsetX.Value, out var x))
-                        offsetX.Value = ((int)(factor * x)).ToString(CultureInfo.InvariantCulture);
+                        offsetX.Value = ((int)Math.Round(factor * x)).ToString(CultureInfo.InvariantCulture);
                     if (offsetY != null && !string.IsNullOrEmpty(offsetY.Value) && int.TryParse(offsetY.Value, out var y))
-                        offsetY.Value = ((int)(factor * y)).ToString(CultureInfo.InvariantCulture);
+                        offsetY.Value = ((int)Math.Round(factor * y)).ToString(CultureInfo.InvariantCulture);
                 }
 
                 // process Region elements
