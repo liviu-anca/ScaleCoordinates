@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Xml;
 
@@ -10,22 +11,50 @@ namespace ScaleCoordinates
         const string normalizeFrom = "normalize_from";
         const string denormalizeTo = "denormalize_to";
         static readonly string[] actions = new[] { normalizeFrom, denormalizeTo };
-        static readonly string usageMsg = $"Usage: ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> ({normalizeFrom}|{denormalizeTo})=<scaling>";
+        static readonly string usageMsg = $@"
+Usage:
+    ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> ({normalizeFrom}|{denormalizeTo})=<scaling>
+or:
+    ScaleCoordinates <folder_path> ({normalizeFrom}|{denormalizeTo})=<scaling>
+";
         static readonly string invalidScaling = "Invalid value for parameter 'scaling'";
 
         static void Main(string[] args)
         {
             // parse input and validate
 
-            if (args.Length != 3)
+            if (args.Length < 1)
             {
                 Console.WriteLine(usageMsg);
                 return;
             }
 
-            var filePathIn = args[0];
-            var filePathOut = args[1];
-            var operation = args[2];
+            string operation = string.Empty;
+            var processFolder = false;
+
+            if (Directory.Exists(args[0]))
+            {
+                // we have only 1 more arg
+                if (args.Length != 2)
+                {
+                    Console.WriteLine(usageMsg);
+                    return;
+                }
+                operation = args[1];
+                processFolder = true;
+            }
+            else
+            {
+                // assume it's a file path; in this case, we have 2 more args
+                if (args.Length != 3)
+                {
+                    Console.WriteLine(usageMsg);
+                    return;
+                }
+                operation = args[2];
+                processFolder = false;
+            }
+
             var parts = operation.Split('=');
 
             if (parts.Length != 2 || !actions.Contains(parts[0]))
@@ -44,12 +73,20 @@ namespace ScaleCoordinates
                 ? 100.0 / scaling // normalize from non-standard 'scaling' to 100%
                 : scaling / 100.0; // de-normalize from 100% to non-standard scaling
 
+            if (processFolder)
+                ProcessFolder(args[0], factor);
+            else
+                ProcessFile(args[0], args[1], factor);
+        }
+
+        static void ProcessFile(string inputFilePath, string outputFilePath, double factor)
+        {
             try
             {
                 // open input file
 
                 var doc = new XmlDocument();
-                doc.Load(filePathIn);
+                doc.Load(inputFilePath);
                 var root = doc.DocumentElement;
                 var nsmgr = new XmlNamespaceManager(doc.NameTable);
                 nsmgr.AddNamespace("ui", "http://schemas.uipath.com/workflow/activities");
@@ -116,12 +153,17 @@ namespace ScaleCoordinates
 
                 // save output file
 
-                doc.Save(filePathOut);
+                doc.Save(outputFilePath);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        static void ProcessFolder(string folderPath, double factor)
+        {
+
         }
     }
 }
