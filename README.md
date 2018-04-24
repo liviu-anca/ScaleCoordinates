@@ -7,18 +7,25 @@ Download the desired version module from the [Releases](https://github.com/UiPat
 ## Usage
 Open a Command Prompt window and type:
 ```CMD
-ScaleCoordinates <xaml_file_path_in> <xaml_file_path_out> <multiply> <divide>
+ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> normalize_from=<scaling>
 ```
+to normalize coordinates from a non-standard scaling (between 100% and 500%, other than 100%) to standard scaling (100%)
+or:
+```CMD
+ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> denormalize_to=<scaling>
+```
+to de-normalize coordinates from standard scaling (100%) to a non-standard scaling (between 100% and 500%, other than 100%)
+
 `<input_xaml_file_path>`: path to XAML source file
 
 `<output_xaml_file_path>`: path to XAML destination file
 
-The initial value will be multiplied by `<multiply>` and divided by `<divide>`.
+`<scaling>`: non-standard scaling value to normalize coordinates from or to de-normalize coordinates to.
 
 #### Example:
 
 ```CMD
-ScaleCoordinates "C:\UiPath\Projects\Activities\Main.xaml" "C:\UiPath\Projects\Activities_fixed\Main.xaml" 100 150
+ScaleCoordinates "C:\UiPath\Projects\Activities\Main.xaml" "C:\UiPath\Projects\Activities_fixed\Main.xaml" normalize_from=150
 ```
 This command will scale the coordinates by a factor of 0.667 (100/150). It would be useful if the workflow file was saved at a scale of 150% in a previous version (18.1.x) and run at a scale of 100% in the current version (18.2.x).
 

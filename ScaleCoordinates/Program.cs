@@ -7,26 +7,42 @@ namespace ScaleCoordinates
 {
     class Program
     {
+        const string normalizeFrom = "normalize_from";
+        const string denormalizeTo = "denormalize_to";
+        static readonly string[] actions = new[] { normalizeFrom, denormalizeTo };
+        static readonly string usageMsg = $"Usage: ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> ({normalizeFrom}|{denormalizeTo})=<scaling>";
+        static readonly string invalidScaling = "Invalid value for parameter 'scaling'";
+
         static void Main(string[] args)
         {
             // parse input and validate
 
-            if (args.Length != 4)
+            if (args.Length != 3)
             {
-                Console.WriteLine("Usage: ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> <multiply> <divide>");
+                Console.WriteLine(usageMsg);
                 return;
             }
 
             var filePathIn = args[0];
             var filePathOut = args[1];
+            var operation = args[2];
+            var parts = operation.Split('=');
 
-            if (!double.TryParse(args[2], out var mul) || !double.TryParse(args[3], out var div) || mul <= 0 || div <= 0)
+            if (parts.Length != 2 || !actions.Contains(parts[0]))
             {
-                Console.WriteLine("Invalid arguments");
+                Console.WriteLine(usageMsg);
                 return;
             }
 
-            var factor = mul / div;
+            if (!int.TryParse(parts[1], out var scaling) || scaling < 100 || scaling > 500)
+            {
+                Console.WriteLine(invalidScaling);
+                return;
+            }
+
+            var factor = parts[0] == normalizeFrom
+                ? 100.0 / scaling // normalize from non-standard 'scaling' to 100%
+                : scaling / 100.0; // de-normalize from 100% to non-standard scaling
 
             try
             {
