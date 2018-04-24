@@ -8,79 +8,99 @@ namespace ScaleCoordinates
 {
     class Program
     {
-        const string normalizeFrom = "normalize_from";
-        const string denormalizeTo = "denormalize_to";
-        static readonly string[] actions = new[] { normalizeFrom, denormalizeTo };
-        static readonly string usageMsg = $@"
-Usage:
-    ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> ({normalizeFrom}|{denormalizeTo})=<scaling>
+        const string NormalizeFrom = "normalize_from";
+        const string DenormalizeTo = "denormalize_to";
+        static readonly string[] Actions = new[] { NormalizeFrom, DenormalizeTo };
+        static readonly string UsageMsg =
+$@"Usage:
+    ScaleCoordinates <input_xaml_file_path> <output_xaml_file_path> ({NormalizeFrom}|{DenormalizeTo})=<scaling>
 or:
-    ScaleCoordinates <folder_path> ({normalizeFrom}|{denormalizeTo})=<scaling>
-";
-        static readonly string invalidScaling = "Invalid value for parameter 'scaling'";
+    ScaleCoordinates <folder_path> ({NormalizeFrom}|{DenormalizeTo})=<scaling>";
+        static readonly string InvalidScalingMsg = "Invalid value for parameter 'scaling'";
+        static readonly string FolderProcessingConfirmationMsg =
+@"Folder processing will modify all the XAML files in the given path.
+Please enter 'yes' to confirm or 'no' to cancel.";
 
         static void Main(string[] args)
         {
             // parse input and validate
 
-            if (args.Length < 1)
+            if (args.Length < 2 || args.Length > 3)
             {
-                Console.WriteLine(usageMsg);
+                Console.WriteLine(UsageMsg);
                 return;
             }
 
             string operation = string.Empty;
             var processFolder = false;
 
-            if (Directory.Exists(args[0]))
+            if (args.Length == 2)
             {
-                // we have only 1 more arg
-                if (args.Length != 2)
+                // assume we should process a folder
+                if (!Directory.Exists(args[0]))
                 {
-                    Console.WriteLine(usageMsg);
+                    Console.WriteLine(UsageMsg);
                     return;
                 }
+
                 operation = args[1];
                 processFolder = true;
             }
-            else
+            else // args.Length = 3
             {
-                // assume it's a file path; in this case, we have 2 more args
-                if (args.Length != 3)
-                {
-                    Console.WriteLine(usageMsg);
-                    return;
-                }
                 operation = args[2];
                 processFolder = false;
             }
 
+            // parse and validate 'scaling' value
+
             var parts = operation.Split('=');
 
-            if (parts.Length != 2 || !actions.Contains(parts[0]))
+            if (parts.Length != 2 || !Actions.Contains(parts[0]))
             {
-                Console.WriteLine(usageMsg);
+                Console.WriteLine(UsageMsg);
                 return;
             }
 
             if (!int.TryParse(parts[1], out var scaling) || scaling < 100 || scaling > 500)
             {
-                Console.WriteLine(invalidScaling);
+                Console.WriteLine(InvalidScalingMsg);
                 return;
             }
 
-            var factor = parts[0] == normalizeFrom
+            var factor = parts[0] == NormalizeFrom
                 ? 100.0 / scaling // normalize from non-standard 'scaling' to 100%
                 : scaling / 100.0; // de-normalize from 100% to non-standard scaling
 
+            // do the processing 
+
             if (processFolder)
+            {
+                // processing would be made in-place, ask for confirmation
+                Console.WriteLine(FolderProcessingConfirmationMsg);
+                var confirm = Console.ReadLine();
+                if (confirm.ToUpper() != "YES")
+                    return;
+
                 ProcessFolder(args[0], factor);
+            }
             else
+            {
+                // validate File existence
+                if (!File.Exists(args[0]))
+                {
+                    Console.WriteLine(UsageMsg);
+                    return;
+                }
+
                 ProcessFile(args[0], args[1], factor);
+            }
         }
 
         static void ProcessFile(string inputFilePath, string outputFilePath, double factor)
         {
+            Console.WriteLine($"Processing '{inputFilePath}' to '{outputFilePath}' with {factor:0.###}");
+
             try
             {
                 // open input file
@@ -163,7 +183,22 @@ or:
 
         static void ProcessFolder(string folderPath, double factor)
         {
+            try
+            {
+                // process XAML files
+                var files = Directory.GetFiles(folderPath, "*.xaml");
+                foreach (var file in files)
+                    ProcessFile(file, file, factor); // do in-place processing
 
+                // process subfolders
+                var folders = Directory.GetDirectories(folderPath);
+                foreach (var folder in folders)
+                    ProcessFolder(folder, factor); // recursive call
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }
